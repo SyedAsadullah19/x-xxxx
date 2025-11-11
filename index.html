@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>xxxxx</title>
+<meta name="title" content="xxxxx">
+<meta name="description" content="xxxxx is a flappy bird game made to help stop porn addiction by improving focus and self-control. Play anytime to relax your mind.">
+<meta name="keywords" content="xxxxx, flappy bird, focus game, nofap, dopamine detox, stop porn addiction game">
+<meta name="author" content="Syed Asadullah">
+
+<style>
+  * {margin:0; padding:0; box-sizing:border-box;}
+  body {
+    background: linear-gradient(#70c5ce, #fff);
+    font-family: "Segoe UI", sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: start;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  h1 {
+    margin-top: 10px;
+    color: #333;
+    font-size: 26px;
+    text-transform: uppercase;
+  }
+
+  canvas {
+    background: linear-gradient(#4ec0ca, #ffffff);
+    border: 3px solid #000;
+    border-radius: 10px;
+    width: 95vw;
+    max-width: 400px;
+    height: 70vh;
+  }
+
+  .faq, .desc {
+    text-align: center;
+    margin-top: 15px;
+    max-width: 400px;
+    padding: 10px;
+    color: #222;
+    font-size: 15px;
+  }
+
+  .faq h2 {
+    margin-top: 10px;
+    font-size: 20px;
+  }
+
+  button {
+    margin-top: 10px;
+    background: #008CBA;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+  }
+
+  button:hover {
+    background: #006b8f;
+  }
+</style>
+</head>
+<body>
+
+<h1>xxxxx</h1>
+<canvas id="gameCanvas" width="400" height="600"></canvas>
+<button id="startBtn">Start / Jump</button>
+
+<div class="desc">
+  <p><strong>xxxxx</strong> is a fun and mindful flappy bird-style game that helps build focus and discipline. It’s designed to keep you engaged and away from bad habits — play whenever you feel distracted!</p>
+</div>
+
+<div class="faq">
+  <h2>FAQ - About xxxxx</h2>
+  <p><b>What is xxxxx?</b><br>xxxxx is a flappy bird game made to help you control impulses and overcome addiction.</p>
+  <p><b>How does xxxxx help?</b><br>It gives you an instant, positive alternative to mindless scrolling or bad habits — improving focus and dopamine balance.</p>
+  <p><b>Can I play xxxxx on mobile?</b><br>Yes! Tap anywhere or press “Start / Jump” to fly — works on phones and PCs.</p>
+</div>
+
+<script>
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+const startBtn = document.getElementById("startBtn");
+
+let frames = 0;
+const DEGREE = Math.PI/180;
+
+const state = { current: 0, getReady: 0, game: 1, over: 2 };
+
+canvas.addEventListener("click", () => handleClick());
+startBtn.addEventListener("click", () => handleClick());
+document.addEventListener("keydown", e => {
+  if(e.code === "Space") handleClick();
+});
+
+function handleClick(){
+  switch(state.current){
+    case state.getReady: state.current = state.game; break;
+    case state.game: bird.flap(); break;
+    case state.over: resetGame(); break;
+  }
+}
+
+const bird = {
+  x: 50, y: 150, w: 34, h: 26, gravity: 0.25, jump: 4.6, speed: 0, rotation: 0,
+  draw(){
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.rotate(this.rotation);
+    ctx.fillStyle = "yellow";
+    ctx.beginPath();
+    ctx.arc(0, 0, 12, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  },
+  flap(){ this.speed = -this.jump; },
+  update(){
+    if(state.current === state.getReady){ this.y = 150; this.rotation = 0; }
+    else {
+      this.speed += this.gravity;
+      this.y += this.speed;
+      if(this.y + 12 >= canvas.height - 50){
+        this.y = canvas.height - 50 - 12;
+        if(state.current === state.game){ state.current = state.over; }
+      }
+      this.rotation = this.speed >= this.jump ? 90*DEGREE : -25*DEGREE;
+    }
+  },
+  reset(){ this.y = 150; this.speed = 0; }
+};
+
+const pipes = {
+  pos: [], gap: 100, dx: 2,
+  draw(){
+    ctx.fillStyle = "green";
+    for(let p of this.pos){
+      ctx.fillRect(p.x, p.y, 50, 300);
+      ctx.fillRect(p.x, p.y + 300 + this.gap, 50, 300);
+    }
+  },
+  update(){
+    if(state.current !== state.game) return;
+    if(frames % 100 === 0)
+      this.pos.push({ x: canvas.width, y: -Math.random()*150 - 150 });
+
+    for(let i=0; i<this.pos.length; i++){
+      let p = this.pos[i];
+      p.x -= this.dx;
+
+      if(bird.x + 12 > p.x && bird.x - 12 < p.x + 50 &&
+        (bird.y - 12 < p.y + 300 || bird.y + 12 > p.y + 300 + this.gap)){
+          state.current = state.over;
+      }
+
+      if(p.x + 50 < 0){ this.pos.shift(); score.value++; score.best = Math.max(score.value, score.best); }
+    }
+  },
+  reset(){ this.pos = []; }
+};
+
+const score = {
+  value: 0, best: 0,
+  draw(){
+    ctx.fillStyle = "#000";
+    ctx.font = "24px Arial";
+    if(state.current === state.game) ctx.fillText(this.value, canvas.width/2 - 10, 50);
+    if(state.current === state.over){
+      ctx.fillText("Score: " + this.value, 130, 200);
+      ctx.fillText("Best: " + this.best, 130, 240);
+      ctx.fillText("Tap or Press Start", 100, 280);
+    }
+  },
+  reset(){ this.value = 0; }
+};
+
+function drawGround(){
+  ctx.fillStyle = "#DEB887";
+  ctx.fillRect(0, canvas.height - 50, canvas.width, 50);
+}
+
+function draw(){
+  ctx.fillStyle = "#70c5ce";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  pipes.draw(); drawGround(); bird.draw(); score.draw();
+}
+
+function update(){
+  bird.update();
+  pipes.update();
+}
+
+function resetGame(){
+  pipes.reset(); bird.reset(); score.reset();
+  state.current = state.getReady;
+}
+
+function loop(){
+  update(); draw(); frames++;
+  requestAnimationFrame(loop);
+}
+loop();
+</script>
+
+</body>
+</html>
