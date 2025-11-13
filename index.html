@@ -1,213 +1,436 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
 <title>xxxxx</title>
-<meta name="title" content="xxxxx">
-<meta name="description" content="xxxxx is a flappy bird game made to help stop porn addiction by improving focus and self-control. Play anytime to relax your mind.">
-<meta name="keywords" content="xxxxx, flappy bird, focus game, nofap, dopamine detox, stop porn addiction game">
-<meta name="author" content="Syed Asadullah">
-<meta name="google-site-verification" content="kC99ImE3eMnuRn_eCCpoahySpqsXThXnbZXAx3ro7Uc" />
+<meta name="description" content="xxxxx — a flappy bird style web game to build focus and replace bad habits. Play on desktop or mobile."/>
+<meta name="keywords" content="xxxxx, flappy bird, focus game, nofap, stop porn addiction" />
 <style>
-  * {margin:0; padding:0; box-sizing:border-box;}
-  body {
-    background: linear-gradient(#70c5ce, #fff);
-    font-family: "Segoe UI", sans-serif;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: start;
-    height: 100vh;
-    overflow: hidden;
+  :root{
+    --bg1:#70c5ce; --bg2:#ffffff; --pipe:#2E8B57; --ground:#DEB887;
+  }
+  html,body{
+    height:100%;
+    margin:0;
+    font-family:system-ui,Arial,Helvetica,sans-serif;
+    background:linear-gradient(var(--bg1),var(--bg2));
   }
 
-  h1 {
-    margin-top: 10px;
-    color: #333;
-    font-size: 26px;
-    text-transform: uppercase;
+  /* fixed top ad */
+  .ad-banner{
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    height:90px;
+    background:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:40;
+    border-bottom:1px solid #e6e6e6;
+  }
+  .ad-banner img{ max-width:100%; height:auto; display:block; }
+
+  /* page content below ad */
+  .page {
+    position: absolute;
+    top:90px;
+    left:0; right:0; bottom:0;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    overflow:hidden; /* prevent desktop scroll */
+    padding:12px;
   }
 
-  canvas {
-    background: linear-gradient(#4ec0ca, #ffffff);
-    border: 3px solid #000;
-    border-radius: 10px;
-    width: 95vw;
-    max-width: 400px;
-    height: 70vh;
+  .layout {
+    width:100%;
+    max-width:1200px;
+    display:flex;
+    gap:20px;
+    align-items:center;
+    justify-content:center;
   }
 
-  .faq, .desc {
-    text-align: center;
-    margin-top: 15px;
-    max-width: 400px;
-    padding: 10px;
-    color: #222;
-    font-size: 15px;
+  /* left / right side boxes */
+  .side {
+    width:300px;
+    min-width:230px;
+    max-height: calc(100vh - 150px);
+    background:rgba(255,255,255,0.82);
+    border-radius:10px;
+    padding:14px;
+    overflow:auto;
+    box-shadow:0 8px 20px rgba(0,0,0,0.08);
+  }
+  .side h2{ margin:0 0 8px 0; font-size:18px; color:#222; }
+  .side p{ font-size:14px; color:#222; line-height:1.4; margin-bottom:10px; }
+
+  /* center game box */
+  .center {
+    width:420px; /* fixed logical width */
+    flex:0 0 420px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:8px;
   }
 
-  .faq h2 {
-    margin-top: 10px;
-    font-size: 20px;
+  canvas{
+    width:100%;
+    height:auto;
+    border-radius:12px;
+    display:block;
+    background:linear-gradient(#9fe6ea,#70c5ce);
+    box-shadow:0 12px 30px rgba(0,0,0,0.15);
   }
 
-  button {
-    margin-top: 10px;
-    background: #008CBA;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 8px;
-    font-size: 16px;
-  }
+  .controls { display:flex; gap:8px; align-items:center; justify-content:center; }
+  .btn { background:#008CBA; color:#fff; border:none; padding:8px 14px; border-radius:8px; cursor:pointer; font-size:15px; }
+  .scorebar { font-weight:600; color:#111; }
 
-  button:hover {
-    background: #006b8f;
+  /* MOBILE: stack and allow scroll */
+  @media (max-width:900px){
+    .page { top:70px; overflow:auto; }
+    .layout { flex-direction:column; align-items:center; padding-bottom:20px; }
+    .side { width:92%; max-width:420px; min-width:unset; max-height:none; }
+    .center { width:92%; max-width:420px; flex:0 0 auto; }
+    .ad-banner { height:70px; }
   }
 </style>
 </head>
 <body>
 
-<h1>xxxxx</h1>
-<canvas id="gameCanvas" width="400" height="600"></canvas>
-<button id="startBtn">Start / Jump</button>
-
-<div class="desc">
-  <p><strong>xxxxx</strong> is a fun and mindful flappy bird-style game that helps build focus and discipline. It’s designed to keep you engaged and away from bad habits — play whenever you feel distracted!</p>
+<!-- Fixed ad at top -->
+<div class="ad-banner" role="banner" aria-label="Advertisement">
+  <a href="https://secure.switchkonnect.com/aff.php?aff=1434" rel="nofollow">
+    <img src="http://secure.switchkonnect.com/aff_ban/Webbanner_728x90px_3.jpg" alt="Ad banner">
+  </a>
 </div>
 
-<div class="faq">
-  <h2>FAQ - About xxxxx</h2>
-  <p><b>What is xxxxx?</b><br>xxxxx is a flappy bird game made to help you control impulses and overcome addiction.</p>
-  <p><b>How does xxxxx help?</b><br>It gives you an instant, positive alternative to mindless scrolling or bad habits — improving focus and dopamine balance.</p>
-  <p><b>Can I play xxxxx on mobile?</b><br>Yes! Tap anywhere or press “Start / Jump” to fly — works on phones and PCs.</p>
+<!-- Main page -->
+<div class="page">
+  <div class="layout" role="main">
+    <!-- Left about -->
+    <aside class="side" aria-labelledby="aboutTitle">
+      <h2 id="aboutTitle">About xxxxx</h2>
+      <p><strong>xxxxx</strong> is a small, focused flappy-bird style game created to help you train attention and replace impulsive habits with a short mindful game break.</p>
+      <p>It works on desktop and mobile — tap or press Space to flap. Short sessions of play can help reset your focus.</p>
+      <p>Follow-up to xxxxx-Classic Snake Game — same simple goals: quick play, low distraction, more control.</p>
+    </aside>
+
+    <!-- Center game -->
+    <section class="center" aria-label="Game area">
+      <div style="width:100%; display:flex; justify-content:space-between; align-items:center;">
+        <div class="scorebar">Score: <span id="score">0</span></div>
+        <div class="scorebar">Best: <span id="best">0</span></div>
+      </div>
+      <canvas id="canvas"></canvas>
+      <div class="controls">
+        <button id="startBtn" class="btn">Start</button>
+        <button id="muteBtn" class="btn">Mute</button>
+      </div>
+      <div style="font-size:13px; color:#333; text-align:center; margin-top:6px;">Tap or press <kbd>Space</kbd> to flap</div>
+    </section>
+
+    <!-- Right faq -->
+    <aside class="side" aria-labelledby="faqTitle">
+      <h2 id="faqTitle">FAQ</h2>
+      <p><strong>What is xxxxx?</strong><br>xxxxx is a flappy bird clone tailored as a quick focus exercise to replace unhelpful browsing habits.</p>
+      <p><strong>How to play?</strong><br>Click / tap the canvas or press Space to flap and avoid pipes. Survive as long as you can.</p>
+      <p><strong>Is it mobile friendly?</strong><br>Yes — on phones the ad stays on top, the game is below and About/FAQ appear below the game (page scroll allowed on mobile).</p>
+    </aside>
+  </div>
 </div>
 
 <script>
-const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d");
-const startBtn = document.getElementById("startBtn");
+/* ---- Responsive high-DPI canvas setup ---- */
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
 
-let frames = 0;
-const DEGREE = Math.PI/180;
+const LOGICAL_W = 420;
+const LOGICAL_H = 600;
 
-const state = { current: 0, getReady: 0, game: 1, over: 2 };
+function resizeCanvas() {
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  canvas.style.width = Math.min(LOGICAL_W, Math.min(window.innerWidth - 40, 420)) + 'px';
+  // compute CSS height using same aspect ratio
+  const cssW = parseFloat(canvas.style.width);
+  const cssH = cssW * (LOGICAL_H / LOGICAL_W);
+  canvas.style.height = cssH + 'px';
 
-canvas.addEventListener("click", () => handleClick());
-startBtn.addEventListener("click", () => handleClick());
-document.addEventListener("keydown", e => {
-  if(e.code === "Space") handleClick();
-});
-
-function handleClick(){
-  switch(state.current){
-    case state.getReady: state.current = state.game; break;
-    case state.game: bird.flap(); break;
-    case state.over: resetGame(); break;
-  }
+  canvas.width = Math.round(cssW * dpr);
+  canvas.height = Math.round(cssH * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  // store logical drawing size for game math
+  canvas.logicalWidth = LOGICAL_W * (cssW / LOGICAL_W);
+  canvas.logicalHeight = LOGICAL_H * (cssW / LOGICAL_W);
 }
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
 
+/* ---- Game variables ---- */
+let frames = 0;
+let pipes = [];
+let score = 0;
+let best = parseInt(localStorage.getItem('xxxxx_best') || '0', 10) || 0;
+document.getElementById('best').textContent = best;
+document.getElementById('score').textContent = 0;
+let running = false;
+let muted = false;
+
+/* bird */
 const bird = {
-  x: 50, y: 150, w: 34, h: 26, gravity: 0.25, jump: 4.6, speed: 0, rotation: 0,
-  draw(){
+  x: 80,
+  y: 240,
+  r: 12,
+  vy: 0,
+  gravity: 0.45,
+  jump: -8,
+  rotation: 0,
+  reset() { this.y = canvas.logicalHeight/2; this.vy = 0; this.rotation = 0; },
+  flap() { this.vy = this.jump; if (!muted) playTone(800,0.06); },
+  update() {
+    this.vy += this.gravity;
+    this.y += this.vy;
+    // rotation
+    if (this.vy < 0) this.rotation = -0.5;
+    else this.rotation = Math.min(1.0, this.rotation + 0.03);
+    // ground/ceiling clamp
+    if (this.y + this.r > canvas.logicalHeight - 20) {
+      this.y = canvas.logicalHeight - 20 - this.r;
+      this.vy = 0;
+      running = false;
+      if (!muted) playTone(160,0.12);
+    }
+    if (this.y - this.r < 0) {
+      this.y = this.r;
+      this.vy = 0;
+    }
+  },
+  draw() {
     ctx.save();
     ctx.translate(this.x, this.y);
     ctx.rotate(this.rotation);
-    ctx.fillStyle = "yellow";
+    // body
+    ctx.fillStyle = '#ffd633';
+    ctx.strokeStyle = '#d6a900';
+    ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.arc(0, 0, 12, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.ellipse(0,0,this.r*1.3,this.r,0,0,Math.PI*2);
+    ctx.fill(); ctx.stroke();
+    // eye
+    ctx.fillStyle = '#000';
+    ctx.beginPath(); ctx.arc(5,-3,2.2,0,Math.PI*2); ctx.fill();
+    // beak
+    ctx.fillStyle = '#ff7a00';
+    ctx.beginPath(); ctx.moveTo(10,0); ctx.lineTo(17,-5); ctx.lineTo(17,5); ctx.closePath(); ctx.fill();
     ctx.restore();
-  },
-  flap(){ this.speed = -this.jump; },
-  update(){
-    if(state.current === state.getReady){ this.y = 150; this.rotation = 0; }
-    else {
-      this.speed += this.gravity;
-      this.y += this.speed;
-      if(this.y + 12 >= canvas.height - 50){
-        this.y = canvas.height - 50 - 12;
-        if(state.current === state.game){ state.current = state.over; }
+  }
+};
+
+/* pipes */
+const PIPE_W = 60;
+const GAP = 150;
+const PIPE_SPEED = 2.6;
+function spawnPipe() {
+  const centerY = Math.floor(Math.random() * (canvas.logicalHeight - 240)) + 120;
+  pipes.push({ x: canvas.logicalWidth + 20, centerY, passed:false });
+}
+function updatePipes() {
+  for (let i = pipes.length - 1; i >= 0; i--) {
+    const p = pipes[i];
+    p.x -= PIPE_SPEED;
+    // score
+    if (!p.passed && p.x + PIPE_W/2 < bird.x) { p.passed = true; score++; document.getElementById('score').textContent = score; if (!muted) playTone(1000,0.04); if (score > best) { best = score; localStorage.setItem('xxxxx_best', best); document.getElementById('best').textContent = best; } }
+    // remove
+    if (p.x + PIPE_W < -50) pipes.splice(i,1);
+  }
+}
+function drawPipes() {
+  ctx.fillStyle = '#2E8B57';
+  ctx.strokeStyle = '#1f5d3d';
+  ctx.lineWidth = 3;
+  for (const p of pipes) {
+    const topH = p.centerY - (GAP/2);
+    const bottomY = p.centerY + (GAP/2);
+    // top pipe
+    ctx.fillRect(p.x, 0, PIPE_W, topH);
+    ctx.strokeRect(p.x, 0, PIPE_W, topH);
+    // bottom pipe
+    ctx.fillRect(p.x, bottomY, PIPE_W, canvas.logicalHeight - bottomY);
+    ctx.strokeRect(p.x, bottomY, PIPE_W, canvas.logicalHeight - bottomY);
+    // rims
+    ctx.fillStyle = '#1f5d3d';
+    ctx.fillRect(p.x-2, topH-10, PIPE_W+4, 12);
+    ctx.fillRect(p.x-2, bottomY, PIPE_W+4, 12);
+    ctx.fillStyle = '#2E8B57';
+  }
+}
+
+/* collision detection (circle vs rect) */
+function circleRectCollide(cx, cy, r, rx, ry, rw, rh) {
+  const closestX = Math.max(rx, Math.min(cx, rx+rw));
+  const closestY = Math.max(ry, Math.min(cy, ry+rh));
+  const dx = cx - closestX;
+  const dy = cy - closestY;
+  return (dx*dx + dy*dy) < (r*r);
+}
+
+/* drawing ground */
+function drawGround() {
+  ctx.fillStyle = '--ground';
+  ctx.fillStyle = '#DEB887';
+  ctx.fillRect(0, canvas.logicalHeight - 20, canvas.logicalWidth, 20);
+}
+
+/* game loop */
+let spawnTimer = 0;
+function resetGame() {
+  pipes = [];
+  score = 0;
+  document.getElementById('score').textContent = 0;
+  bird.reset();
+  frames = 0;
+  spawnTimer = 0;
+  running = false;
+}
+function startGame() {
+  resetGame();
+  running = true;
+}
+function update() {
+  if (running) {
+    frames++;
+    bird.update();
+    // spawn pipes every ~110 frames
+    spawnTimer++;
+    if (spawnTimer > 110) { spawnTimer = 0; spawnPipe(); }
+    updatePipes();
+    // check collisions with pipes
+    for (const p of pipes) {
+      const topH = p.centerY - (GAP/2);
+      const bottomY = p.centerY + (GAP/2);
+      if (circleRectCollide(bird.x, bird.y, bird.r, p.x, 0, PIPE_W, topH) ||
+          circleRectCollide(bird.x, bird.y, bird.r, p.x, bottomY, PIPE_W, canvas.logicalHeight - bottomY)) {
+        running = false;
+        if (!muted) playTone(120,0.12);
       }
-      this.rotation = this.speed >= this.jump ? 90*DEGREE : -25*DEGREE;
     }
-  },
-  reset(){ this.y = 150; this.speed = 0; }
-};
+  } else {
+    // small idle bob when not running
+    bird.y = canvas.logicalHeight/2 + Math.sin(frames/10)*6;
+    frames++;
+  }
+}
+function draw() {
+  // clear background
+  ctx.fillStyle = '#9fe6ea';
+  ctx.fillRect(0,0,canvas.logicalWidth, canvas.logicalHeight);
+  // pipes
+  drawPipes();
+  // ground
+  drawGround();
+  // bird
+  bird.draw();
 
-const pipes = {
-  pos: [], gap: 100, dx: 2,
-  draw(){
-    ctx.fillStyle = "green";
-    for(let p of this.pos){
-      ctx.fillRect(p.x, p.y, 50, 300);
-      ctx.fillRect(p.x, p.y + 300 + this.gap, 50, 300);
-    }
-  },
-  update(){
-    if(state.current !== state.game) return;
-    if(frames % 100 === 0)
-      this.pos.push({ x: canvas.width, y: -Math.random()*150 - 150 });
-
-    for(let i=0; i<this.pos.length; i++){
-      let p = this.pos[i];
-      p.x -= this.dx;
-
-      if(bird.x + 12 > p.x && bird.x - 12 < p.x + 50 &&
-        (bird.y - 12 < p.y + 300 || bird.y + 12 > p.y + 300 + this.gap)){
-          state.current = state.over;
-      }
-
-      if(p.x + 50 < 0){ this.pos.shift(); score.value++; score.best = Math.max(score.value, score.best); }
-    }
-  },
-  reset(){ this.pos = []; }
-};
-
-const score = {
-  value: 0, best: 0,
-  draw(){
-    ctx.fillStyle = "#000";
-    ctx.font = "24px Arial";
-    if(state.current === state.game) ctx.fillText(this.value, canvas.width/2 - 10, 50);
-    if(state.current === state.over){
-      ctx.fillText("Score: " + this.value, 130, 200);
-      ctx.fillText("Best: " + this.best, 130, 240);
-      ctx.fillText("Tap or Press Start", 100, 280);
-    }
-  },
-  reset(){ this.value = 0; }
-};
-
-function drawGround(){
-  ctx.fillStyle = "#DEB887";
-  ctx.fillRect(0, canvas.height - 50, canvas.width, 50);
+  // overlay messages
+  ctx.fillStyle = 'rgba(0,0,0,0.7)';
+  ctx.font = '16px system-ui, Arial';
+  ctx.textAlign = 'center';
+  if (!running && frames === 0) {
+    // initial message (first load)
+    ctx.fillStyle = '#111';
+    ctx.fillText('Click / Tap or press Space to start', canvas.logicalWidth/2, canvas.logicalHeight/2 - 10);
+  } else if (!running && frames > 0) {
+    ctx.fillStyle = '#111';
+    ctx.fillText('Game Over — Tap or press Start to play again', canvas.logicalWidth/2, canvas.logicalHeight/2 - 10);
+  }
 }
 
-function draw(){
-  ctx.fillStyle = "#70c5ce";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  pipes.draw(); drawGround(); bird.draw(); score.draw();
-}
-
-function update(){
-  bird.update();
-  pipes.update();
-}
-
-function resetGame(){
-  pipes.reset(); bird.reset(); score.reset();
-  state.current = state.getReady;
-}
-
-function loop(){
-  update(); draw(); frames++;
+/* animation frame */
+function loop() {
+  update();
+  draw();
   requestAnimationFrame(loop);
 }
-loop();
-</script>
 
+/* input handling */
+canvas.addEventListener('pointerdown', (e) => {
+  // On first interaction, ensure canvas sized correctly
+  if (!running && frames === 0) { startGame(); bird.flap(); return; }
+  if (!running) { startGame(); return; }
+  bird.flap();
+});
+window.addEventListener('keydown', (e) => {
+  if (e.code === 'Space') {
+    e.preventDefault();
+    if (!running && frames === 0) { startGame(); bird.flap(); return; }
+    if (!running) { startGame(); return; }
+    bird.flap();
+  }
+});
+
+/* UI buttons */
+document.getElementById('startBtn').addEventListener('click', () => {
+  if (!running) startGame();
+  bird.flap();
+});
+document.getElementById('muteBtn').addEventListener('click', () => {
+  muted = !muted;
+  document.getElementById('muteBtn').textContent = muted ? 'Unmute' : 'Mute';
+});
+
+/* simple tone generator for feedback */
+let audioCtx;
+function ensureAudio() {
+  if (!audioCtx) {
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+    catch(e) { audioCtx = null; }
+  }
+}
+function playTone(freq, duration) {
+  ensureAudio();
+  if (!audioCtx) return;
+  const o = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  o.type = 'sine';
+  o.frequency.value = freq;
+  g.gain.value = 0.08;
+  o.connect(g); g.connect(audioCtx.destination);
+  o.start();
+  g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+  o.stop(audioCtx.currentTime + duration + 0.02);
+}
+
+/* initialize */
+function init() {
+  resizeCanvas(); // initial sizing
+  bird.reset();
+  frames = 0;
+  loop();
+}
+function resizeCanvas() {
+  // call the earlier resize function (keeps logical drawing consistent)
+  // compute desired CSS width (we used resizeCanvas earlier conceptually)
+  // reuse earlier function definition
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  // CSS width equals center element width; compute from style
+  const containerWidth = Math.min(420, Math.max(280, Math.min(window.innerWidth - 40, 420)));
+  const cssW = containerWidth;
+  const cssH = cssW * (LOGICAL_H / LOGICAL_W);
+  canvas.style.width = cssW + 'px';
+  canvas.style.height = cssH + 'px';
+  canvas.width = Math.round(cssW * dpr);
+  canvas.height = Math.round(cssH * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  canvas.logicalWidth = cssW;
+  canvas.logicalHeight = cssH;
+}
+window.addEventListener('resize', () => { resizeCanvas(); });
+init();
+</script>
 </body>
 </html>
-
