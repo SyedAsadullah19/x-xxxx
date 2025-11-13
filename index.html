@@ -1,301 +1,418 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>xxxxx</title>
-<meta name="description" content="xxxxx — a flappy bird-style focus game to improve concentration and reduce distractions." />
-<style>
-  :root{
-    --header-h:64px;
-    --ad-h-desktop:90px;
-    --ad-h-mobile:70px;
-    --center-w:420px;
-  }
-  html,body{height:100%;margin:0;font-family:system-ui,Arial,Helvetica,sans-serif;background:linear-gradient(#70c5ce,#fff);}
-  /* Header */
-  .site-header{
-    position:fixed;top:0;left:0;right:0;height:var(--header-h);
-    display:flex;align-items:center;justify-content:center;background:#0b6edc;color:#fff;font-weight:800;z-index:60;font-size:20px;
-    box-shadow:0 2px 6px rgba(0,0,0,0.08);
-  }
-  /* Ad */
-  .ad-banner{
-    position:fixed;left:0;right:0;top:var(--header-h);height:var(--ad-h-desktop);
-    display:flex;align-items:center;justify-content:center;background:#fff;z-index:50;border-bottom:1px solid #eee;padding:6px;
-  }
-  .ad-banner img{max-width:100%;height:auto;display:block;}
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
 
-  /* Main area below header+ad */
-  .page {
-    position: absolute;
-    top: calc(var(--header-h) + var(--ad-h-desktop) + 18px); /* extra gap so HUD never hides */
-    left:0; right:0; bottom:0;
-    display:flex;justify-content:center;align-items:flex-start;padding:18px;overflow:hidden;
+  <!-- Exact keyword meta/title (per your requirement) -->
+  <title>xxxxx</title>
+  <meta name="title" content="xxxxx" />
+  <meta name="description" content="xxxxx — a flappy bird-style web game designed to improve focus and reduce distractions. Play on desktop or mobile to build quick mindful breaks." />
+  <meta name="keywords" content="xxxxx, flappy bird, focus game, mindfulness game, dopamine detox" />
+  <meta name="author" content="Syed Asadullah" />
+  <link rel="canonical" href="https://yourdomain.com/xxxxx" />
+
+  <!-- JSON-LD for basic SEO -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "xxxxx",
+    "url": "https://yourdomain.com/xxxxx",
+    "description": "xxxxx — a flappy bird-style web game to improve focus. Play on desktop or mobile."
   }
+  </script>
 
-  .layout{width:100%;max-width:1200px;display:flex;gap:18px;align-items:flex-start;justify-content:center;}
-  .side{width:280px;min-width:200px;background:rgba(255,255,255,0.95);padding:14px;border-radius:10px;box-shadow:0 12px 30px rgba(0,0,0,0.08);max-height:calc(100vh - 240px);overflow:auto;}
-  .side h2{margin:0 0 8px 0;font-size:18px;color:#222;}
-  .center{flex:0 0 var(--center-w);width:var(--center-w);display:flex;flex-direction:column;align-items:center;gap:8px;}
+  <style>
+    :root {
+      --header-h:64px;
+      --ad-h-desktop:90px;
+      --ad-h-mobile:70px;
+      --center-w:420px;
+      --bg1:#70c5ce;
+      --bg2:#ffffff;
+    }
+    * { box-sizing: border-box; }
+    html,body { height:100%; margin:0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial; background: linear-gradient(var(--bg1),var(--bg2)); -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
 
-  /* Canvas sized in JS; CSS keeps it responsive */
-  canvas{width:100%;height:auto;display:block;border-radius:12px;background:linear-gradient(#9fe6ea,#70c5ce);box-shadow:0 12px 30px rgba(0,0,0,0.14);}
+    /* Header (exact keyword) */
+    .site-header {
+      position: fixed; top:0; left:0; right:0;
+      height: var(--header-h);
+      display:flex; align-items:center; justify-content:center;
+      background: #0b6edc; color:#fff; font-weight:800; z-index:60; font-size:20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
 
-  .controls{display:flex;gap:8px;align-items:center;margin-top:6px;}
-  .btn{background:#0b6edc;color:#fff;border:none;padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:700;}
-  .btn.alt{background:#666;}
-  #replayBtn{display:none;margin-top:8px;background:#ff6b35;color:#fff;border:none;padding:10px 14px;border-radius:8px;cursor:pointer;font-weight:800;}
+    /* Ad banner (fixed below header) */
+    .ad-banner {
+      position: fixed; left:0; right:0; top: var(--header-h);
+      height: var(--ad-h-desktop);
+      display:flex; align-items:center; justify-content:center;
+      background: #fff; z-index:50; border-bottom:1px solid #eee; padding:6px;
+    }
+    .ad-banner img { max-width:100%; height:auto; display:block; }
 
-  @media (max-width:900px){
-    :root{ --ad-h-desktop: var(--ad-h-mobile); }
-    .page{top:calc(var(--header-h) + var(--ad-h-mobile) + 12px);overflow:auto;}
-    .layout{flex-direction:column;align-items:center;padding-bottom:20px;}
-    .side{width:92%;max-width:420px;min-width:unset;max-height:none;}
-    .center{width:92%;max-width:420px;flex:0 0 auto;}
-    .ad-banner{height:var(--ad-h-mobile);}
-    .site-header{font-size:18px;height:56px;}
-    html,body{-webkit-overflow-scrolling:touch;}
-  }
-</style>
+    /* Page content under header+ad; extra gap so HUD is visible */
+    .page {
+      position: absolute;
+      top: calc(var(--header-h) + var(--ad-h-desktop) + 18px);
+      left:0; right:0; bottom:0;
+      display:flex; justify-content:center; align-items:flex-start;
+      padding:18px; overflow:hidden; /* desktop: no scroll */
+    }
+
+    .layout {
+      width:100%; max-width:1200px;
+      display:flex; gap:18px; align-items:flex-start; justify-content:center;
+    }
+
+    .side {
+      width:280px; min-width:200px;
+      background: rgba(255,255,255,0.95);
+      padding:14px; border-radius:10px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+      max-height: calc(100vh - 240px);
+      overflow:auto;
+    }
+    .side h2 { margin:0 0 8px 0; font-size:18px; color:#222; }
+    .side p { margin-bottom:10px; color:#333; font-size:14px; line-height:1.45; }
+
+    .center {
+      flex:0 0 var(--center-w);
+      width: var(--center-w);
+      display:flex; flex-direction:column; align-items:center; gap:10px;
+    }
+
+    /* Canvas; actual pixel size handled in JS */
+    canvas {
+      width:100%; height:auto; display:block; border-radius:12px;
+      background: linear-gradient(#9fe6ea,#70c5ce);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.14);
+    }
+
+    .hud-dom { width:100%; display:flex; justify-content:space-between; font-weight:700; color:#111; padding:0 6px; }
+    .controls { display:flex; gap:8px; align-items:center; margin-top:6px; }
+    .btn { background:#0b6edc; color:#fff; border:none; padding:8px 12px; border-radius:8px; cursor:pointer; font-weight:700; }
+    .btn.alt { background:#666; }
+    #replayBtn { display:none; margin-top:6px; background:#ff6b35; color:#fff; border:none; padding:10px 14px; border-radius:8px; cursor:pointer; font-weight:800; }
+
+    @media (max-width:900px) {
+      :root { --ad-h-desktop: var(--ad-h-mobile); }
+      .page { top: calc(var(--header-h) + var(--ad-h-mobile) + 12px); overflow:auto; }
+      .layout { flex-direction:column; align-items:center; padding-bottom:20px; }
+      .side { width:92%; max-width:420px; min-width:unset; max-height:none; }
+      .center { width:92%; max-width:420px; flex:0 0 auto; }
+      .ad-banner { height:var(--ad-h-mobile); }
+      .site-header { font-size:18px; height:56px; }
+      html,body { -webkit-overflow-scrolling:touch; }
+    }
+  </style>
 </head>
 <body>
 
-  <div class="site-header" role="banner" aria-label="title">xxxxx</div>
+  <!-- Header (exact keyword) -->
+  <div class="site-header" role="banner" aria-label="site title">xxxxx</div>
 
-  <div class="ad-banner" role="region" aria-label="ad">
-    <a href="https://secure.switchkonnect.com/aff.php?aff=1434" rel="nofollow" target="_blank" aria-label="Ad link">
-      <img src="http://secure.switchkonnect.com/aff_ban/Webbanner_728x90px_3.jpg" alt="Ad">
+  <!-- Top Ad (fixed) -->
+  <div class="ad-banner" role="region" aria-label="advertisement">
+    <a href="https://secure.switchkonnect.com/aff.php?aff=1434" rel="nofollow" target="_blank" aria-label="advert link">
+      <img src="http://secure.switchkonnect.com/aff_ban/Webbanner_728x90px_3.jpg" alt="Ad banner">
     </a>
   </div>
 
+  <!-- Main page -->
   <div class="page" role="main">
     <div class="layout">
-
       <aside class="side" aria-labelledby="aboutTitle">
         <h2 id="aboutTitle">About xxxxx</h2>
         <p><strong>xxxxx</strong> is a short, mindful flappy-bird style game to improve focus. Tap/click or press Space to flap. Short sessions help reset attention.</p>
-        <p>Built as a follow-up to xxxxx-Classic Snake Game — low-distraction, quick-play design.</p>
+        <p>Follow-up to xxxxx-Classic Snake Game — low-distraction, quick-play design.</p>
       </aside>
 
       <main class="center" role="application" aria-label="game area">
-        <!-- HUD is now only inside canvas -->
-        <canvas id="gameCanvas"></canvas>
-        <div class="controls" role="group" aria-label="game controls">
+        <!-- DOM HUD intentionally removed per your request; scoreboard is inside canvas -->
+        <canvas id="gameCanvas" aria-label="xxxxx game canvas"></canvas>
+
+        <div class="controls" role="group" aria-label="controls">
           <button id="startBtn" class="btn">Start</button>
           <button id="muteBtn" class="btn alt">Mute</button>
         </div>
+
         <button id="replayBtn" aria-hidden="true">Replay</button>
-        <div style="font-size:13px;color:#333;margin-top:6px;text-align:center;">Tap / Click or press <kbd>Space</kbd> to flap</div>
+        <div style="font-size:13px;color:#333;margin-top:6px;text-align:center;">Tap / click or press <kbd>Space</kbd> to flap</div>
       </main>
 
       <aside class="side" aria-labelledby="faqTitle">
         <h2 id="faqTitle">FAQ</h2>
         <p><strong>What is xxxxx?</strong><br>xxxxx is a quick browser game to practice focus and replace impulsive browsing with a mindful action.</p>
-        <p><strong>Mobile friendly?</strong><br>Yes — header and ad remain fixed; page scroll is allowed on phones so About/FAQ are reachable below the game.</p>
+        <p><strong>Mobile friendly?</strong><br>Yes — header and ad stay fixed; page scroll is allowed on phones so About/FAQ are reachable below the game.</p>
       </aside>
-
     </div>
   </div>
 
-<script>
-/* ---------- Final: scoreboard inside canvas only ---------- */
+  <script>
+  /* ---------------- Final robust Flappy implementation ---------------- */
+  const canvas = document.getElementById('gameCanvas');
+  const ctx = canvas.getContext('2d');
 
-/* Canvas + DPR resizing */
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
-const LOG_W = 420, LOG_H = 600;
+  const LOG_W = 420, LOG_H = 600;
 
-function resizeCanvas(){
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  const cssW = Math.min(LOG_W, Math.max(260, Math.min(window.innerWidth - 40, LOG_W)));
-  const cssH = Math.round(cssW * (LOG_H / LOG_W));
-  canvas.style.width = cssW + 'px';
-  canvas.style.height = cssH + 'px';
-  canvas.width = Math.round(cssW * dpr);
-  canvas.height = Math.round(cssH * dpr);
-  ctx.setTransform(dpr,0,0,dpr,0,0);
-  canvas.logicalWidth = cssW;
-  canvas.logicalHeight = cssH;
-}
-window.addEventListener('resize', resizeCanvas);
-resizeCanvas();
-
-/* DOM buttons */
-const startBtn = document.getElementById('startBtn');
-const muteBtn = document.getElementById('muteBtn');
-const replayBtn = document.getElementById('replayBtn');
-
-/* Game state */
-let running = false;
-let frames = 0;
-let spawnTimer = 0;
-let pipes = [];
-let score = 0;
-let best = parseInt(localStorage.getItem('xxxxx_best') || '0', 10) || 0;
-let muted = false;
-
-/* Bird */
-const bird = {
-  x: 80,
-  y: canvas.logicalHeight/2,
-  r: 14,
-  vy: 0,
-  gravity: 0.45,
-  jump: -8,
-  rotation: 0,
-  reset(){
-    this.y = canvas.logicalHeight/2;
-    this.vy = 0;
-    this.rotation = 0;
-  },
-  flap(){
-    this.vy = this.jump; playTone(750,0.06);
-  },
-  update(){
-    this.vy += this.gravity; this.y += this.vy;
-    if(this.vy < 0) this.rotation = -0.6; else this.rotation = Math.min(1.2, this.rotation + 0.05);
-    if(this.y + this.r > canvas.logicalHeight - 20){
-      this.y = canvas.logicalHeight - 20 - this.r; this.vy = 0; running = false; playTone(140,0.12);
-    }
-    if(this.y - this.r < 0){ this.y = this.r; this.vy = 0; }
-  },
-  draw(){
-    ctx.save(); ctx.translate(this.x, this.y); ctx.rotate(this.rotation);
-    ctx.fillStyle = '#ffd633'; ctx.strokeStyle = '#d6a900'; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.ellipse(0,0,this.r*1.3,this.r,0,0,Math.PI*2); ctx.fill(); ctx.stroke();
-    ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(5,-3,2.4,0,Math.PI*2); ctx.fill();
-    ctx.fillStyle = '#ff7a00'; ctx.beginPath(); ctx.moveTo(10,0); ctx.lineTo(18,-6); ctx.lineTo(18,6); ctx.closePath(); ctx.fill();
-    ctx.restore();
+  function resizeCanvas(){
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const cssW = Math.min(LOG_W, Math.max(260, Math.min(window.innerWidth - 40, LOG_W)));
+    const cssH = Math.round(cssW * (LOG_H / LOG_W));
+    canvas.style.width = cssW + 'px';
+    canvas.style.height = cssH + 'px';
+    canvas.width = Math.round(cssW * dpr);
+    canvas.height = Math.round(cssH * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    canvas.logicalWidth = cssW;
+    canvas.logicalHeight = cssH;
   }
-};
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
 
-/* Pipes */
-const PIPE_W = 60;
-const GAP = 150;
-const PIPE_SPEED = 2.8;
-function spawnPipe(){
-  const cy = Math.floor(Math.random() * (canvas.logicalHeight - 240)) + 120;
-  pipes.push({ x: canvas.logicalWidth + PIPE_W, centerY: cy, passed:false });
-}
-function updatePipes(){
-  for(let i = pipes.length-1; i >= 0; i--){
-    const p = pipes[i];
-    p.x -= PIPE_SPEED;
-    if(!p.passed && p.x + PIPE_W/2 < bird.x){
-      p.passed = true; score++; playTone(980,0.04);
-      if(score > best){ best = score; localStorage.setItem('xxxxx_best', best); }
-    }
-    if(p.x + PIPE_W < -50) pipes.splice(i,1);
-  }
-}
-function drawPipes(){
-  ctx.fillStyle = '#2e8b57'; ctx.strokeStyle = '#1f5d3d'; ctx.lineWidth = 3;
-  for(const p of pipes){
-    const topH = p.centerY - GAP/2;
-    const bottomY = p.centerY + GAP/2;
-    ctx.fillRect(p.x, 0, PIPE_W, topH);
-    ctx.strokeRect(p.x, 0, PIPE_W, topH);
-    ctx.fillRect(p.x, bottomY, PIPE_W, canvas.logicalHeight - bottomY);
-    ctx.strokeRect(p.x, bottomY, PIPE_W, canvas.logicalHeight - bottomY);
-    ctx.fillStyle = '#1f5d3d';
-    ctx.fillRect(p.x-2, topH-10, PIPE_W+4, 12);
-    ctx.fillRect(p.x-2, bottomY, PIPE_W+4, 12);
-    ctx.fillStyle = '#2e8b57';
-  }
-}
+  // controls
+  const startBtn = document.getElementById('startBtn');
+  const muteBtn = document.getElementById('muteBtn');
+  const replayBtn = document.getElementById('replayBtn');
 
-/* Collision helper */
-function circleRect(cx, cy, r, rx, ry, rw, rh){
-  const closestX = Math.max(rx, Math.min(cx, rx+rw));
-  const closestY = Math.max(ry, Math.min(cy, ry+rh));
-  const dx = cx - closestX; const dy = cy - closestY;
-  return (dx*dx + dy*dy) < (r*r);
-}
+  // game state
+  let running = false;
+  let frames = 0;
+  let spawnTimer = 0;
+  let pipes = [];
+  let score = 0;
+  let best = parseInt(localStorage.getItem('xxxxx_best') || '0', 10) || 0;
+  let muted = false;
 
-/* Ground */
-function drawGround(){ ctx.fillStyle = '#DEB887'; ctx.fillRect(0, canvas.logicalHeight - 20, canvas.logicalWidth, 20); }
+  // bird object (drawn as shapes)
+  const bird = {
+    x: 80,
+    y: LOG_H/2,
+    r: 14,
+    vy: 0,
+    gravity: 0.45,
+    jump: -8,
+    rotation: 0,
+    reset(){
+      this.y = canvas.logicalHeight / 2;
+      this.vy = 0;
+      this.rotation = 0;
+    },
+    flap(){
+      this.vy = this.jump;
+      playTone(760, 0.06);
+    },
+    update(){
+      this.vy += this.gravity;
+      this.y += this.vy;
+      if (this.vy < 0) this.rotation = -0.6;
+      else this.rotation = Math.min(1.2, this.rotation + 0.05);
 
-/* HUD inside canvas */
-function drawHUD(){
-  ctx.fillStyle = 'rgba(0,0,0,0.75)';
-  ctx.font = '20px system-ui, Arial';
-  ctx.textAlign = 'center';
-  ctx.fillText('Score: ' + score, canvas.logicalWidth/2, 36);
-}
-
-/* Game over overlay (inside canvas) */
-function drawGameOver(){
-  ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(0,0,canvas.logicalWidth, canvas.logicalHeight);
-  ctx.fillStyle = '#fff'; ctx.font = '28px system-ui, Arial'; ctx.textAlign = 'center';
-  ctx.fillText('Game Over', canvas.logicalWidth/2, canvas.logicalHeight/2 - 36);
-  ctx.font = '20px system-ui, Arial';
-  ctx.fillText('Score: ' + score, canvas.logicalWidth/2, canvas.logicalHeight/2);
-  ctx.fillText('Best: ' + best, canvas.logicalWidth/2, canvas.logicalHeight/2 + 30);
-  replayBtn.style.display = 'block'; replayBtn.setAttribute('aria-hidden','false');
-}
-
-/* Game controls */
-function resetGame(){ pipes = []; frames = 0; spawnTimer = 0; score = 0; bird.reset(); running = false; replayBtn.style.display = 'none'; replayBtn.setAttribute('aria-hidden','true'); }
-function startGame(){ resetGame(); running = true; bird.flap(); }
-
-/* Update & draw loops */
-function update(){
-  if(running){
-    frames++;
-    bird.update();
-    spawnTimer++;
-    if(spawnTimer > 110){ spawnTimer = 0; spawnPipe(); }
-    updatePipes();
-    for(const p of pipes){
-      const topH = p.centerY - GAP/2; const bottomY = p.centerY + GAP/2;
-      if(circleRect(bird.x, bird.y, bird.r, p.x, 0, PIPE_W, topH) ||
-         circleRect(bird.x, bird.y, bird.r, p.x, bottomY, PIPE_W, canvas.logicalHeight - bottomY)){
-        running = false; playTone(140,0.12);
+      // ground collision
+      if (this.y + this.r > canvas.logicalHeight - 20) {
+        this.y = canvas.logicalHeight - 20 - this.r;
+        this.vy = 0;
+        running = false;
+        playTone(140, 0.12);
       }
+      // ceiling clamp
+      if (this.y - this.r < 0) { this.y = this.r; this.vy = 0; }
+    },
+    draw(){
+      ctx.save();
+      ctx.translate(this.x, this.y);
+      ctx.rotate(this.rotation);
+      // body
+      ctx.fillStyle = '#ffd633'; ctx.strokeStyle = '#d6a900'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.ellipse(0,0,this.r*1.3,this.r,0,0,Math.PI*2); ctx.fill(); ctx.stroke();
+      // eye
+      ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(5,-3,2.4,0,Math.PI*2); ctx.fill();
+      // beak
+      ctx.fillStyle = '#ff7a00'; ctx.beginPath(); ctx.moveTo(10,0); ctx.lineTo(18,-6); ctx.lineTo(18,6); ctx.closePath(); ctx.fill();
+      ctx.restore();
     }
-  } else {
-    frames++;
-    bird.y = canvas.logicalHeight/2 + Math.sin(frames/12) * 6;
+  };
+
+  // pipes
+  const PIPE_W = 60;
+  const GAP = 150;
+  const PIPE_SPEED = 2.8;
+  function spawnPipe(){
+    const cy = Math.floor(Math.random() * (canvas.logicalHeight - 240)) + 120;
+    pipes.push({ x: canvas.logicalWidth + PIPE_W, centerY: cy, passed:false });
   }
-}
-function draw(){
-  ctx.fillStyle = '#9fe6ea'; ctx.fillRect(0,0,canvas.logicalWidth, canvas.logicalHeight);
-  drawPipes(); drawGround(); bird.draw(); drawHUD();
-  if(!running && frames > 0) drawGameOver();
-  else if(!running && frames === 0){
-    ctx.fillStyle = 'rgba(0,0,0,0.85)'; ctx.font = '18px system-ui, Arial'; ctx.textAlign = 'center';
-    ctx.fillText('Tap / Click or press Space to start', canvas.logicalWidth/2, canvas.logicalHeight/2 - 10);
+  function updatePipes(){
+    for (let i = pipes.length - 1; i >= 0; i--) {
+      const p = pipes[i];
+      p.x -= PIPE_SPEED;
+      // scoring
+      if (!p.passed && p.x + PIPE_W/2 < bird.x) {
+        p.passed = true;
+        score++;
+        playTone(980, 0.04);
+        if (score > best) { best = score; localStorage.setItem('xxxxx_best', best); }
+      }
+      // remove offscreen
+      if (p.x + PIPE_W < -50) pipes.splice(i,1);
+    }
   }
-}
-function loop(){ update(); draw(); requestAnimationFrame(loop); }
+  function drawPipes(){
+    ctx.fillStyle = '#2e8b57'; ctx.strokeStyle = '#1f5d3d'; ctx.lineWidth = 3;
+    for (const p of pipes){
+      const topH = p.centerY - (GAP/2);
+      const bottomY = p.centerY + (GAP/2);
+      ctx.fillRect(p.x, 0, PIPE_W, topH);
+      ctx.strokeRect(p.x, 0, PIPE_W, topH);
+      ctx.fillRect(p.x, bottomY, PIPE_W, canvas.logicalHeight - bottomY);
+      ctx.strokeRect(p.x, bottomY, PIPE_W, canvas.logicalHeight - bottomY);
+      // rims
+      ctx.fillStyle = '#1f5d3d';
+      ctx.fillRect(p.x-2, topH-10, PIPE_W+4, 12);
+      ctx.fillRect(p.x-2, bottomY, PIPE_W+4, 12);
+      ctx.fillStyle = '#2e8b57';
+    }
+  }
 
-/* Input handling */
-canvas.addEventListener('pointerdown', (ev) => {
-  ev.preventDefault();
-  if(!running && frames === 0){ startGame(); return; }
-  if(!running){ startGame(); return; }
-  bird.flap();
-});
-window.addEventListener('keydown', (e) => {
-  if(e.code === 'Space'){ e.preventDefault(); if(!running && frames === 0){ startGame(); return; } if(!running){ startGame(); return; } bird.flap(); }
-});
+  // collision helper
+  function circleRect(cx, cy, r, rx, ry, rw, rh){
+    const closestX = Math.max(rx, Math.min(cx, rx + rw));
+    const closestY = Math.max(ry, Math.min(cy, ry + rh));
+    const dx = cx - closestX; const dy = cy - closestY;
+    return (dx*dx + dy*dy) < (r*r);
+  }
 
-/* UI buttons */
-startBtn.addEventListener('click', () => { if(!running) startGame(); bird.flap(); });
-replayBtn.addEventListener('click', () => { resetGame(); startGame(); });
-muteBtn.addEventListener('click', function(){ muted = !muted; this.textContent = muted ? 'Unmute' : 'Mute'; });
+  // ground
+  function drawGround(){
+    ctx.fillStyle = '#DEB887'; ctx.fillRect(0, canvas.logicalHeight - 20, canvas.logicalWidth, 20);
+  }
 
-/* Audio */
-let audioCtx = null;
-function ensureAudio(){ if(!audioCtx){ try{ audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ audioCtx = null; } } }
-function playTone(freq,dur=0.06){ if(muted) return; ensureAudio(); if(!audioCtx) return; const o = audioCtx.createOscillator(); const g = audioCtx.createGain(); o.type='sine'; o.frequency.value=freq; g.gain.value=0.08; o.connect(g); g.connect(audioCtx.destination); o.start(); g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + dur); o.stop(audioCtx.currentTime + dur + 0.02); }
+  // HUD (inside canvas)
+  function drawHUD(){
+    ctx.fillStyle = 'rgba(0,0,0,0.75)'; ctx.font = '20px system-ui, Arial'; ctx.textAlign = 'center';
+    ctx.fillText('Score: ' + score, canvas.logicalWidth / 2, 36);
+  }
 
-/* Init */
-function init(){ resizeCanvas(); bird.reset(); frames = 0; spawnTimer = 0; running = false; replayBtn.style.display = 'none'; replayBtn.setAttribute('aria-hidden','true'); loop(); }
-window.addEventListener('resize', () => { resizeCanvas(); bird.y = Math.min(canvas.logicalHeight - 30, Math.max(bird.r + 2, bird.y)); });
-init();
+  // game over overlay (inside canvas)
+  function drawGameOver(){
+    ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(0,0,canvas.logicalWidth, canvas.logicalHeight);
+    ctx.fillStyle = '#fff'; ctx.font = '28px system-ui, Arial'; ctx.textAlign = 'center';
+    ctx.fillText('Game Over', canvas.logicalWidth/2, canvas.logicalHeight/2 - 36);
+    ctx.font = '20px system-ui, Arial';
+    ctx.fillText('Score: ' + score, canvas.logicalWidth/2, canvas.logicalHeight/2);
+    ctx.fillText('Best: ' + best, canvas.logicalWidth/2, canvas.logicalHeight/2 + 30);
+    // show replay DOM button
+    replayBtn.style.display = 'block'; replayBtn.setAttribute('aria-hidden','false');
+  }
 
-</script>
+  // reset / start
+  function resetGame(){
+    pipes = []; frames = 0; spawnTimer = 0; score = 0; bird.reset(); running = false;
+    replayBtn.style.display = 'none'; replayBtn.setAttribute('aria-hidden','true');
+  }
+  function startGame(){
+    resetGame();
+    running = true;
+    bird.flap(); // initial flap to make it responsive
+  }
+
+  // update / draw
+  function update(){
+    if (running){
+      frames++;
+      bird.update();
+      spawnTimer++;
+      if (spawnTimer > 110) { spawnTimer = 0; spawnPipe(); }
+      updatePipes();
+      // collisions
+      for (const p of pipes) {
+        const topH = p.centerY - GAP/2;
+        const bottomY = p.centerY + GAP/2;
+        if (circleRect(bird.x, bird.y, bird.r, p.x, 0, PIPE_W, topH) ||
+            circleRect(bird.x, bird.y, bird.r, p.x, bottomY, PIPE_W, canvas.logicalHeight - bottomY)) {
+          running = false;
+          playTone(140, 0.12);
+        }
+      }
+    } else {
+      frames++;
+      bird.y = canvas.logicalHeight/2 + Math.sin(frames/12) * 6;
+    }
+  }
+
+  function draw(){
+    ctx.fillStyle = '#9fe6ea'; ctx.fillRect(0,0,canvas.logicalWidth, canvas.logicalHeight);
+    drawPipes(); drawGround(); bird.draw(); drawHUD();
+    if (!running && frames > 0) drawGameOver();
+    else if (!running && frames === 0) {
+      ctx.fillStyle = 'rgba(0,0,0,0.85)'; ctx.font = '18px system-ui, Arial'; ctx.textAlign = 'center';
+      ctx.fillText('Tap / Click or press Space to start', canvas.logicalWidth/2, canvas.logicalHeight/2 - 10);
+    }
+  }
+
+  function loop(){
+    update(); draw(); requestAnimationFrame(loop);
+  }
+
+  // input handling
+  canvas.addEventListener('pointerdown', (ev) => {
+    ev.preventDefault();
+    if (!running && frames === 0) { startGame(); return; }
+    if (!running) { startGame(); return; }
+    bird.flap();
+  });
+  window.addEventListener('keydown', (e) => {
+    if (e.code === 'Space') {
+      e.preventDefault();
+      if (!running && frames === 0) { startGame(); return; }
+      if (!running) { startGame(); return; }
+      bird.flap();
+    }
+  });
+
+  // UI buttons
+  startBtn.addEventListener('click', () => { if (!running) startGame(); bird.flap(); });
+  replayBtn.addEventListener('click', () => { resetGame(); startGame(); });
+  muteBtn.addEventListener('click', function(){ muted = !muted; this.textContent = muted ? 'Unmute' : 'Mute'; });
+
+  // audio
+  let audioCtx = null;
+  function ensureAudio(){
+    if (!audioCtx) {
+      try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+      catch(e) { audioCtx = null; }
+    }
+  }
+  function playTone(freq, dur = 0.06){
+    if (muted) return;
+    ensureAudio();
+    if (!audioCtx) return;
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = 'sine'; o.frequency.value = freq;
+    g.gain.value = 0.08;
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start();
+    g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + dur);
+    o.stop(audioCtx.currentTime + dur + 0.02);
+  }
+
+  // init
+  function init(){
+    resizeCanvas();
+    bird.reset();
+    frames = 0; spawnTimer = 0; running = false;
+    replayBtn.style.display = 'none'; replayBtn.setAttribute('aria-hidden','true');
+    loop();
+  }
+  window.addEventListener('resize', () => {
+    resizeCanvas();
+    bird.y = Math.min(canvas.logicalHeight - 30, Math.max(bird.r + 2, bird.y));
+  });
+  init();
+
+  </script>
 </body>
 </html>
