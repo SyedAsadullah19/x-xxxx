@@ -2,231 +2,246 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>xxxxx</title>
-<meta name="description" content="xxxxx — a flappy bird style web game to build focus and replace bad habits. Play on desktop or mobile."/>
-<meta name="keywords" content="xxxxx, flappy bird, focus game, nofap, stop porn addiction" />
+<meta name="description" content="xxxxx — a flappy bird-style focus game to improve concentration and reduce distractions." />
 <style>
   :root{
-    --bg1:#70c5ce; --bg2:#ffffff; --pipe:#2E8B57; --ground:#DEB887;
+    --header-h:64px;
+    --ad-h-desktop:90px;
+    --ad-h-mobile:70px;
+    --max-center-w:420px;
   }
   html,body{
     height:100%;
     margin:0;
-    font-family:system-ui,Arial,Helvetica,sans-serif;
-    background:linear-gradient(var(--bg1),var(--bg2));
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+    background: linear-gradient(#70c5ce,#ffffff);
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
   }
 
-  /* fixed top ad */
+  /* header */
+  .site-header{
+    position:fixed; top:0; left:0; right:0;
+    height:var(--header-h);
+    display:flex; align-items:center; justify-content:center;
+    background:#0b6edc; color:#fff;
+    font-weight:800; letter-spacing:1px; z-index:60;
+    box-shadow:0 2px 6px rgba(0,0,0,0.08);
+    font-size:20px;
+  }
+
+  /* ad under header */
   .ad-banner{
-    position:fixed;
-    top:0;
-    left:0;
-    right:0;
-    height:90px;
-    background:#fff;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    z-index:40;
-    border-bottom:1px solid #e6e6e6;
+    position:fixed; left:0; right:0;
+    top:var(--header-h);
+    height:var(--ad-h-desktop);
+    display:flex; align-items:center; justify-content:center;
+    background:#fff; z-index:50; border-bottom:1px solid #eee;
   }
   .ad-banner img{ max-width:100%; height:auto; display:block; }
 
-  /* page content below ad */
+  /* main area under header+ad */
   .page {
     position: absolute;
-    top:90px;
+    top: calc(var(--header-h) + var(--ad-h-desktop));
     left:0; right:0; bottom:0;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    overflow:hidden; /* prevent desktop scroll */
-    padding:12px;
+    display:flex; justify-content:center; align-items:center;
+    padding:14px; overflow:hidden; /* desktop: no scroll */
   }
 
   .layout {
-    width:100%;
-    max-width:1200px;
-    display:flex;
-    gap:20px;
-    align-items:center;
-    justify-content:center;
+    width:100%; max-width:1200px;
+    display:flex; gap:18px; align-items:center; justify-content:center;
   }
 
-  /* left / right side boxes */
   .side {
-    width:300px;
-    min-width:230px;
-    max-height: calc(100vh - 150px);
-    background:rgba(255,255,255,0.82);
-    border-radius:10px;
-    padding:14px;
-    overflow:auto;
-    box-shadow:0 8px 20px rgba(0,0,0,0.08);
+    width:300px; min-width:220px;
+    max-height: calc(100vh - 200px);
+    background: rgba(255,255,255,0.95);
+    padding:14px; border-radius:10px; overflow:auto;
+    box-shadow:0 8px 22px rgba(0,0,0,0.08);
   }
   .side h2{ margin:0 0 8px 0; font-size:18px; color:#222; }
-  .side p{ font-size:14px; color:#222; line-height:1.4; margin-bottom:10px; }
+  .side p{ margin-bottom:10px; color:#333; font-size:14px; line-height:1.45; }
 
-  /* center game box */
   .center {
-    width:420px; /* fixed logical width */
-    flex:0 0 420px;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:8px;
+    width:var(--max-center-w);
+    flex:0 0 var(--max-center-w);
+    display:flex; flex-direction:column; align-items:center; gap:10px;
   }
 
+  /* canvas: actual pixel size handled in JS */
   canvas{
-    width:100%;
-    height:auto;
-    border-radius:12px;
-    display:block;
-    background:linear-gradient(#9fe6ea,#70c5ce);
-    box-shadow:0 12px 30px rgba(0,0,0,0.15);
+    width:100%; height:auto; display:block; border-radius:12px;
+    background: linear-gradient(#9fe6ea,#70c5ce);
+    box-shadow:0 12px 30px rgba(0,0,0,0.14);
   }
 
-  .controls { display:flex; gap:8px; align-items:center; justify-content:center; }
-  .btn { background:#008CBA; color:#fff; border:none; padding:8px 14px; border-radius:8px; cursor:pointer; font-size:15px; }
-  .scorebar { font-weight:600; color:#111; }
+  .controls { display:flex; gap:10px; align-items:center; justify-content:center; }
+  .btn {
+    background:#0b6edc; color:#fff; border:none; padding:8px 14px; border-radius:8px;
+    cursor:pointer; font-weight:600;
+  }
+  .btn.alt { background:#666; }
 
-  /* MOBILE: stack and allow scroll */
+  #replayBtn {
+    display:none;
+    margin-top:6px;
+    background:#ff6b35; color:#fff; border:none; padding:10px 16px; border-radius:8px;
+    cursor:pointer; font-weight:700;
+  }
+
+  /* HUD DOM (best & current) placed above canvas center area */
+  .hud {
+    width:100%; display:flex; justify-content:space-between; align-items:center;
+    font-weight:700; color:#111;
+  }
+
+  /* MOBILE: stack layout and allow scroll */
   @media (max-width:900px){
-    .page { top:70px; overflow:auto; }
-    .layout { flex-direction:column; align-items:center; padding-bottom:20px; }
+    :root{ --ad-h-desktop: var(--ad-h-mobile); }
+    .page { top: calc(var(--header-h) + var(--ad-h-mobile)); overflow:auto; }
+    .layout { flex-direction:column; align-items:center; padding-bottom:30px; }
     .side { width:92%; max-width:420px; min-width:unset; max-height:none; }
     .center { width:92%; max-width:420px; flex:0 0 auto; }
-    .ad-banner { height:70px; }
+    .ad-banner { height:var(--ad-h-mobile); }
+    .site-header { font-size:18px; height:56px; }
+    html,body { -webkit-overflow-scrolling:touch; }
   }
 </style>
 </head>
 <body>
 
-<!-- Fixed ad at top -->
-<div class="ad-banner" role="banner" aria-label="Advertisement">
-  <a href="https://secure.switchkonnect.com/aff.php?aff=1434" rel="nofollow">
-    <img src="http://secure.switchkonnect.com/aff_ban/Webbanner_728x90px_3.jpg" alt="Ad banner">
-  </a>
-</div>
+  <!-- Header -->
+  <div class="site-header" role="banner" aria-label="site title">xxxxx</div>
 
-<!-- Main page -->
-<div class="page">
-  <div class="layout" role="main">
-    <!-- Left about -->
-    <aside class="side" aria-labelledby="aboutTitle">
-      <h2 id="aboutTitle">About xxxxx</h2>
-      <p><strong>xxxxx</strong> is a small, focused flappy-bird style game created to help you train attention and replace impulsive habits with a short mindful game break.</p>
-      <p>It works on desktop and mobile — tap or press Space to flap. Short sessions of play can help reset your focus.</p>
-      <p>Follow-up to xxxxx-Classic Snake Game — same simple goals: quick play, low distraction, more control.</p>
-    </aside>
-
-    <!-- Center game -->
-    <section class="center" aria-label="Game area">
-      <div style="width:100%; display:flex; justify-content:space-between; align-items:center;">
-        <div class="scorebar">Score: <span id="score">0</span></div>
-        <div class="scorebar">Best: <span id="best">0</span></div>
-      </div>
-      <canvas id="canvas"></canvas>
-      <div class="controls">
-        <button id="startBtn" class="btn">Start</button>
-        <button id="muteBtn" class="btn">Mute</button>
-      </div>
-      <div style="font-size:13px; color:#333; text-align:center; margin-top:6px;">Tap or press <kbd>Space</kbd> to flap</div>
-    </section>
-
-    <!-- Right faq -->
-    <aside class="side" aria-labelledby="faqTitle">
-      <h2 id="faqTitle">FAQ</h2>
-      <p><strong>What is xxxxx?</strong><br>xxxxx is a flappy bird clone tailored as a quick focus exercise to replace unhelpful browsing habits.</p>
-      <p><strong>How to play?</strong><br>Click / tap the canvas or press Space to flap and avoid pipes. Survive as long as you can.</p>
-      <p><strong>Is it mobile friendly?</strong><br>Yes — on phones the ad stays on top, the game is below and About/FAQ appear below the game (page scroll allowed on mobile).</p>
-    </aside>
+  <!-- Ad -->
+  <div class="ad-banner" role="region" aria-label="top advertisement">
+    <a href="https://secure.switchkonnect.com/aff.php?aff=1434" rel="nofollow" target="_blank" aria-label="Ad link">
+      <img src="http://secure.switchkonnect.com/aff_ban/Webbanner_728x90px_3.jpg" alt="Ad banner">
+    </a>
   </div>
-</div>
+
+  <!-- Main -->
+  <div class="page" role="main">
+    <div class="layout">
+
+      <aside class="side" aria-labelledby="aboutTitle">
+        <h2 id="aboutTitle">About xxxxx</h2>
+        <p><strong>xxxxx</strong> is a quick browser game to build focus — a mindful break you can play in under a minute.</p>
+        <p>Tap/click or press Space to flap. Short sessions help re-focus your attention and replace impulsive browsing habits.</p>
+      </aside>
+
+      <main class="center" role="application" aria-label="game area">
+        <div class="hud">
+          <div>Score: <span id="domScore">0</span></div>
+          <div>Best: <span id="domBest">0</span></div>
+        </div>
+
+        <canvas id="c"></canvas>
+
+        <div class="controls" role="group" aria-label="controls">
+          <button id="startBtn" class="btn">Start</button>
+          <button id="muteBtn" class="btn alt">Mute</button>
+        </div>
+
+        <button id="replayBtn">Replay</button>
+        <div style="font-size:13px;color:#333;margin-top:6px;text-align:center;">Tap/click or press <kbd>Space</kbd> to flap</div>
+      </main>
+
+      <aside class="side" aria-labelledby="faqTitle">
+        <h2 id="faqTitle">FAQ</h2>
+        <p><strong>What is xxxxx?</strong><br>xxxxx is a simple flappy-bird style game to help you practice short mindful play sessions.</p>
+        <p><strong>Mobile friendly?</strong><br>Yes — ad and header remain fixed; page scroll is allowed on mobile to access About/FAQ.</p>
+      </aside>
+
+    </div>
+  </div>
 
 <script>
-/* ---- Responsive high-DPI canvas setup ---- */
-const canvas = document.getElementById('canvas');
+/* ---------- Robust game implementation ---------- */
+/* High-DPI canvas handling, stable physics, proper input, score HUD, gameover overlay + replay. */
+
+const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d');
 
-const LOGICAL_W = 420;
-const LOGICAL_H = 600;
+const LOGIC_W = 420;
+const LOGIC_H = 600;
 
-function resizeCanvas() {
+function resizeCanvas(){
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  canvas.style.width = Math.min(LOGICAL_W, Math.min(window.innerWidth - 40, 420)) + 'px';
-  // compute CSS height using same aspect ratio
-  const cssW = parseFloat(canvas.style.width);
-  const cssH = cssW * (LOGICAL_H / LOGICAL_W);
+  // CSS width: max 420 but responsive for smaller screens
+  const cssW = Math.min(LOGIC_W, Math.max(260, Math.min(window.innerWidth - 40, LOGIC_W)));
+  const cssH = Math.round(cssW * (LOGIC_H / LOGIC_W));
+  canvas.style.width = cssW + 'px';
   canvas.style.height = cssH + 'px';
-
   canvas.width = Math.round(cssW * dpr);
   canvas.height = Math.round(cssH * dpr);
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  // store logical drawing size for game math
-  canvas.logicalWidth = LOGICAL_W * (cssW / LOGICAL_W);
-  canvas.logicalHeight = LOGICAL_H * (cssW / LOGICAL_W);
+  canvas.logicalWidth = cssW;
+  canvas.logicalHeight = cssH;
 }
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
 
-/* ---- Game variables ---- */
+/* state */
+let running = false;
 let frames = 0;
+let spawnTimer = 0;
 let pipes = [];
 let score = 0;
 let best = parseInt(localStorage.getItem('xxxxx_best') || '0', 10) || 0;
-document.getElementById('best').textContent = best;
-document.getElementById('score').textContent = 0;
-let running = false;
+document.getElementById('domBest').textContent = best;
+document.getElementById('domScore').textContent = score;
 let muted = false;
 
 /* bird */
 const bird = {
   x: 80,
-  y: 240,
-  r: 12,
+  y: canvas.logicalHeight/2,
+  r: 14,
   vy: 0,
   gravity: 0.45,
   jump: -8,
   rotation: 0,
-  reset() { this.y = canvas.logicalHeight/2; this.vy = 0; this.rotation = 0; },
-  flap() { this.vy = this.jump; if (!muted) playTone(800,0.06); },
-  update() {
+  reset(){
+    this.y = canvas.logicalHeight / 2;
+    this.vy = 0;
+    this.rotation = 0;
+  },
+  flap(){
+    this.vy = this.jump;
+    playTone(750,0.06);
+  },
+  update(){
     this.vy += this.gravity;
     this.y += this.vy;
-    // rotation
-    if (this.vy < 0) this.rotation = -0.5;
-    else this.rotation = Math.min(1.0, this.rotation + 0.03);
-    // ground/ceiling clamp
-    if (this.y + this.r > canvas.logicalHeight - 20) {
+    if(this.vy < 0) this.rotation = -0.6; else this.rotation = Math.min(1.2, this.rotation + 0.05);
+    // ground collision
+    if(this.y + this.r > canvas.logicalHeight - 20){
       this.y = canvas.logicalHeight - 20 - this.r;
       this.vy = 0;
       running = false;
-      if (!muted) playTone(160,0.12);
+      playTone(140,0.12);
     }
-    if (this.y - this.r < 0) {
+    if(this.y - this.r < 0){
       this.y = this.r;
       this.vy = 0;
     }
   },
-  draw() {
+  draw(){
     ctx.save();
     ctx.translate(this.x, this.y);
     ctx.rotate(this.rotation);
     // body
-    ctx.fillStyle = '#ffd633';
-    ctx.strokeStyle = '#d6a900';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.ellipse(0,0,this.r*1.3,this.r,0,0,Math.PI*2);
-    ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#ffd633'; ctx.strokeStyle = '#d6a900'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.ellipse(0,0,this.r*1.3,this.r,0,0,Math.PI*2); ctx.fill(); ctx.stroke();
     // eye
-    ctx.fillStyle = '#000';
-    ctx.beginPath(); ctx.arc(5,-3,2.2,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(5,-3,2.4,0,Math.PI*2); ctx.fill();
     // beak
-    ctx.fillStyle = '#ff7a00';
-    ctx.beginPath(); ctx.moveTo(10,0); ctx.lineTo(17,-5); ctx.lineTo(17,5); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#ff7a00'; ctx.beginPath(); ctx.moveTo(10,0); ctx.lineTo(18,-6); ctx.lineTo(18,6); ctx.closePath(); ctx.fill();
     ctx.restore();
   }
 };
@@ -234,26 +249,32 @@ const bird = {
 /* pipes */
 const PIPE_W = 60;
 const GAP = 150;
-const PIPE_SPEED = 2.6;
-function spawnPipe() {
-  const centerY = Math.floor(Math.random() * (canvas.logicalHeight - 240)) + 120;
-  pipes.push({ x: canvas.logicalWidth + 20, centerY, passed:false });
+const PIPE_SPEED = 2.8;
+function spawnPipe(){
+  const minGapTop = 80;
+  const maxGapTop = Math.max(120, canvas.logicalHeight - 240);
+  const cy = Math.floor(Math.random() * (canvas.logicalHeight - 240)) + 120;
+  pipes.push({ x: canvas.logicalWidth + PIPE_W, centerY: cy, passed:false });
 }
-function updatePipes() {
-  for (let i = pipes.length - 1; i >= 0; i--) {
+function updatePipes(){
+  for(let i = pipes.length -1; i >= 0; i--){
     const p = pipes[i];
     p.x -= PIPE_SPEED;
-    // score
-    if (!p.passed && p.x + PIPE_W/2 < bird.x) { p.passed = true; score++; document.getElementById('score').textContent = score; if (!muted) playTone(1000,0.04); if (score > best) { best = score; localStorage.setItem('xxxxx_best', best); document.getElementById('best').textContent = best; } }
-    // remove
-    if (p.x + PIPE_W < -50) pipes.splice(i,1);
+    // score detection
+    if(!p.passed && p.x + PIPE_W/2 < bird.x){
+      p.passed = true;
+      score++;
+      document.getElementById('domScore').textContent = score;
+      playTone(950,0.04);
+      if(score > best){ best = score; localStorage.setItem('xxxxx_best', best); document.getElementById('domBest').textContent = best; }
+    }
+    if(p.x + PIPE_W < -50) pipes.splice(i,1);
+    // collision will be checked elsewhere
   }
 }
-function drawPipes() {
-  ctx.fillStyle = '#2E8B57';
-  ctx.strokeStyle = '#1f5d3d';
-  ctx.lineWidth = 3;
-  for (const p of pipes) {
+function drawPipes(){
+  ctx.fillStyle = '#2E8B57'; ctx.strokeStyle = '#1f5d3d'; ctx.lineWidth = 3;
+  for(const p of pipes){
     const topH = p.centerY - (GAP/2);
     const bottomY = p.centerY + (GAP/2);
     // top pipe
@@ -270,167 +291,199 @@ function drawPipes() {
   }
 }
 
-/* collision detection (circle vs rect) */
-function circleRectCollide(cx, cy, r, rx, ry, rw, rh) {
+/* collision helper: circle vs rect */
+function circleRect(cx, cy, r, rx, ry, rw, rh){
   const closestX = Math.max(rx, Math.min(cx, rx+rw));
   const closestY = Math.max(ry, Math.min(cy, ry+rh));
-  const dx = cx - closestX;
-  const dy = cy - closestY;
+  const dx = cx - closestX; const dy = cy - closestY;
   return (dx*dx + dy*dy) < (r*r);
 }
 
-/* drawing ground */
-function drawGround() {
-  ctx.fillStyle = '--ground';
-  ctx.fillStyle = '#DEB887';
-  ctx.fillRect(0, canvas.logicalHeight - 20, canvas.logicalWidth, 20);
+/* draw ground */
+function drawGround(){
+  ctx.fillStyle = '#DEB887'; ctx.fillRect(0, canvas.logicalHeight - 20, canvas.logicalWidth, 20);
 }
 
-/* game loop */
-let spawnTimer = 0;
-function resetGame() {
-  pipes = [];
-  score = 0;
-  document.getElementById('score').textContent = 0;
-  bird.reset();
-  frames = 0;
-  spawnTimer = 0;
-  running = false;
+/* HUD inside canvas */
+function drawHUD(){
+  ctx.fillStyle = 'rgba(0,0,0,0.75)';
+  ctx.font = '20px system-ui, Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText('Score: ' + score, canvas.logicalWidth / 2, 36);
 }
-function startGame() {
+
+/* Game over overlay (drawn in canvas) */
+function drawGameOver(){
+  ctx.fillStyle = 'rgba(0,0,0,0.5)';
+  ctx.fillRect(0,0,canvas.logicalWidth, canvas.logicalHeight);
+  ctx.fillStyle = '#fff';
+  ctx.font = '28px system-ui, Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText('Game Over', canvas.logicalWidth/2, canvas.logicalHeight/2 - 36);
+  ctx.font = '20px system-ui, Arial';
+  ctx.fillText('Score: ' + score, canvas.logicalWidth/2, canvas.logicalHeight/2);
+  ctx.fillText('Best: ' + best, canvas.logicalWidth/2, canvas.logicalHeight/2 + 30);
+  // show DOM replay
+  const replayBtn = document.getElementById('replayBtn');
+  replayBtn.style.display = 'block';
+}
+
+/* update & draw */
+function resetGame(){
+  pipes = []; frames = 0; spawnTimer = 0; score = 0;
+  document.getElementById('domScore').textContent = score;
+  bird.reset();
+  running = false;
+  document.getElementById('replayBtn').style.display = 'none';
+}
+function startGame(){
   resetGame();
   running = true;
+  bird.flap(); // initial flap so player feels responsive
 }
-function update() {
-  if (running) {
+
+function update(){
+  if(running){
     frames++;
     bird.update();
-    // spawn pipes every ~110 frames
     spawnTimer++;
-    if (spawnTimer > 110) { spawnTimer = 0; spawnPipe(); }
+    if(spawnTimer > 110){ spawnTimer = 0; spawnPipe(); }
     updatePipes();
-    // check collisions with pipes
-    for (const p of pipes) {
+    // collision checks
+    for(const p of pipes){
       const topH = p.centerY - (GAP/2);
       const bottomY = p.centerY + (GAP/2);
-      if (circleRectCollide(bird.x, bird.y, bird.r, p.x, 0, PIPE_W, topH) ||
-          circleRectCollide(bird.x, bird.y, bird.r, p.x, bottomY, PIPE_W, canvas.logicalHeight - bottomY)) {
+      if(circleRect(bird.x, bird.y, bird.r, p.x, 0, PIPE_W, topH) ||
+         circleRect(bird.x, bird.y, bird.r, p.x, bottomY, PIPE_W, canvas.logicalHeight - bottomY)){
         running = false;
-        if (!muted) playTone(120,0.12);
+        playTone(140,0.12);
       }
     }
   } else {
-    // small idle bob when not running
-    bird.y = canvas.logicalHeight/2 + Math.sin(frames/10)*6;
     frames++;
+    // idle bob
+    bird.y = canvas.logicalHeight/2 + Math.sin(frames/12) * 6;
   }
 }
-function draw() {
-  // clear background
+
+function draw(){
+  // clear
   ctx.fillStyle = '#9fe6ea';
   ctx.fillRect(0,0,canvas.logicalWidth, canvas.logicalHeight);
-  // pipes
-  drawPipes();
-  // ground
-  drawGround();
-  // bird
-  bird.draw();
 
-  // overlay messages
-  ctx.fillStyle = 'rgba(0,0,0,0.7)';
-  ctx.font = '16px system-ui, Arial';
-  ctx.textAlign = 'center';
-  if (!running && frames === 0) {
-    // initial message (first load)
-    ctx.fillStyle = '#111';
-    ctx.fillText('Click / Tap or press Space to start', canvas.logicalWidth/2, canvas.logicalHeight/2 - 10);
-  } else if (!running && frames > 0) {
-    ctx.fillStyle = '#111';
-    ctx.fillText('Game Over — Tap or press Start to play again', canvas.logicalWidth/2, canvas.logicalHeight/2 - 10);
+  drawPipes();
+  drawGround();
+  bird.draw();
+  drawHUD();
+
+  if(!running && frames > 0){
+    drawGameOver();
+  } else if(!running && frames === 0){
+    // show start hint
+    ctx.fillStyle = 'rgba(0,0,0,0.85)';
+    ctx.font = '18px system-ui, Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('Tap / Click or press Space to start', canvas.logicalWidth/2, canvas.logicalHeight/2 - 10);
   }
 }
 
-/* animation frame */
-function loop() {
+/* Main loop */
+function loop(){
   update();
   draw();
   requestAnimationFrame(loop);
 }
 
-/* input handling */
-canvas.addEventListener('pointerdown', (e) => {
-  // On first interaction, ensure canvas sized correctly
-  if (!running && frames === 0) { startGame(); bird.flap(); return; }
-  if (!running) { startGame(); return; }
+/* Input handling */
+function getCanvasPosFromEvent(e){
+  const rect = canvas.getBoundingClientRect();
+  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+  const x = clientX - rect.left;
+  const y = clientY - rect.top;
+  // convert CSS coords to logical (we kept logical = CSS px)
+  return { x, y };
+}
+
+canvas.addEventListener('pointerdown', (ev) => {
+  // unify pointer, touch, mouse
+  ev.preventDefault();
+  if(!running && frames === 0){
+    startGame();
+    return;
+  }
+  if(!running){
+    startGame();
+    return;
+  }
   bird.flap();
 });
 window.addEventListener('keydown', (e) => {
-  if (e.code === 'Space') {
+  if(e.code === 'Space'){
     e.preventDefault();
-    if (!running && frames === 0) { startGame(); bird.flap(); return; }
-    if (!running) { startGame(); return; }
+    if(!running && frames === 0){
+      startGame();
+      return;
+    }
+    if(!running){
+      startGame();
+      return;
+    }
     bird.flap();
   }
 });
 
 /* UI buttons */
 document.getElementById('startBtn').addEventListener('click', () => {
-  if (!running) startGame();
+  if(!running) startGame();
   bird.flap();
 });
-document.getElementById('muteBtn').addEventListener('click', () => {
+document.getElementById('replayBtn').addEventListener('click', () => {
+  resetGame();
+  startGame();
+});
+document.getElementById('muteBtn').addEventListener('click', function(){
   muted = !muted;
-  document.getElementById('muteBtn').textContent = muted ? 'Unmute' : 'Mute';
+  this.textContent = muted ? 'Unmute' : 'Mute';
 });
 
-/* simple tone generator for feedback */
-let audioCtx;
-function ensureAudio() {
-  if (!audioCtx) {
-    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
-    catch(e) { audioCtx = null; }
+/* audio */
+let audioCtx = null;
+function ensureAudio(){
+  if(!audioCtx){
+    try{ audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }catch(e){ audioCtx = null; }
   }
 }
-function playTone(freq, duration) {
+function playTone(freq, dur=0.06){
+  if(muted) return;
   ensureAudio();
-  if (!audioCtx) return;
+  if(!audioCtx) return;
   const o = audioCtx.createOscillator();
   const g = audioCtx.createGain();
-  o.type = 'sine';
-  o.frequency.value = freq;
+  o.type = 'sine'; o.frequency.value = freq;
   g.gain.value = 0.08;
   o.connect(g); g.connect(audioCtx.destination);
-  o.start();
-  g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
-  o.stop(audioCtx.currentTime + duration + 0.02);
+  o.start(); g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + dur);
+  o.stop(audioCtx.currentTime + dur + 0.02);
 }
 
-/* initialize */
-function init() {
-  resizeCanvas(); // initial sizing
+/* init */
+function init(){
+  resizeCanvas(); // set sizes
   bird.reset();
-  frames = 0;
+  frames = 0; spawnTimer = 0; running = false;
+  document.getElementById('domBest').textContent = best;
+  document.getElementById('domScore').textContent = score;
+  document.getElementById('replayBtn').style.display = 'none';
   loop();
 }
-function resizeCanvas() {
-  // call the earlier resize function (keeps logical drawing consistent)
-  // compute desired CSS width (we used resizeCanvas earlier conceptually)
-  // reuse earlier function definition
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  // CSS width equals center element width; compute from style
-  const containerWidth = Math.min(420, Math.max(280, Math.min(window.innerWidth - 40, 420)));
-  const cssW = containerWidth;
-  const cssH = cssW * (LOGICAL_H / LOGICAL_W);
-  canvas.style.width = cssW + 'px';
-  canvas.style.height = cssH + 'px';
-  canvas.width = Math.round(cssW * dpr);
-  canvas.height = Math.round(cssH * dpr);
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  canvas.logicalWidth = cssW;
-  canvas.logicalHeight = cssH;
-}
-window.addEventListener('resize', () => { resizeCanvas(); });
+window.addEventListener('resize', () => {
+  resizeCanvas();
+  // keep bird within bounds after resize
+  bird.y = Math.min(canvas.logicalHeight - 30, Math.max(bird.r + 2, bird.y));
+});
 init();
+
 </script>
 </body>
 </html>
